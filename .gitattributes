@@ -1,3 +1,6 @@
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.a filter=lfs diff=lfs merge=lfs -text
+. filter=lfs diff=lfs merge=lfs -text
 “.test filter=lfs diff=lfs merge=lfs -text
 .a filter=lfs diff=lfs merge=lfs -text
 .ue filter=lfs diff=lfs merge=lfs -text
