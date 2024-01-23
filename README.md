@@ -204,3 +204,121 @@ bash
 Copy code
 vim schema.json
 
+
+
+fill in the content below
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+       
+                            }
+                        ]
+                    }
+                },
+                "rxMessages": {
+                    "$id": "#/properties/rmr/properties/rxMessages",
+                    "type": "array",
+                    "title": "The rxMessages schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        [
+                            "RIC_SUB_RESP",
+                            "RIC_INDICATION",
+                            "RIC_SUB_RESP",
+                            "RIC_SUB_FAILURE",
+                            "RIC_SUB_DEL_RESP",
+                            "RIC_SUB_DEL_FAILURE"
+                            
+                        ]
+                    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/rmr/properties/rxMessages/items",
+                        "anyOf": [
+                            {
+                                "$id": "#/properties/rmr/properties/rxMessages/items/anyOf/0",
+                                "type": "string",
+                                "title": "The first anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": "",
+                                "examples": [
+                                    "RIC_SUB_RESP",
+                                    "RIC_INDICATION",
+                                    "RIC_SUB_RESP",
+                                    "RIC_SUB_FAILURE",
+                                    "RIC_SUB_DEL_RESP",
+                                    "RIC_SUB_DEL_FAILURE"
+                            
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "policies": {
+                    "$id": "#/properties/rmr/properties/policies",
+                    "type": "array",
+                    "title": "The policies schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        []
+                    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/rmr/properties/policies/items"
+                    }
+                }
+            },
+            "additionalProperties": true
+        }
+    },
+    "additionalProperties": true
+}
+execute onboard
+export CHART_REPO_URL=http://0.0.0.0:8090
+dms_cli onboard scp-kpimon-config-file.json schema.json
+5.3 Execute Deployment
+dms_cli install --xapp_chart_name=scp-kpimon --version=1.0.1 --namespace=ricxapp
+5.4 Register KPI xApp
+Before proceeding with registration, ensure that your eNB or gNB is already connected to the Near-RT RIC!
+# 只需要輸入一次
+export APPMGR_HTTP=`sudo kubectl get svc -n ricplt --field-selector metadata.name=service-ricplt-appmgr-http -o jsonpath='{.items[0].spec.clusterIP}'`
+
+# 每次註冊都要輸入一次
+curl -il -X 'POST' http://$APPMGR_HTTP:8080/ric/v1/register -H 'accept: application/json' -H 'Content-Type: application/json' -d '{
+"appName": "scp-kpimon",
+"appVersion": "1.0.1", 
+"appInstanceName": "scp-kpimon",
+"httpEndpoint": "<none>:8080",
+"rmrEndpoint": "<none>:4560",
+
+
+A response of HTTP/1.1 201 Created indicates a successful operation.
+5.5 Check if Registration Was Successful
+You should be able to see the registration information for the KPI xApp.
+5.6 Other Common Commands
+Deregister
+curl -il -X 'POST' http://$APPMGR_HTTP:8080/ric/v1/deregister -H 'accept: application/json' -H 'Content-Type: application/json' -d '{
+"appName": "scp-kpimon",
+"appInstanceName": "scp-kpimon"
+}'
+
+A response of HTTP/1.1 204 No Content indicates a successful operation.
+Check the logs of the KPI monitor
+sudo kubectl logs -f -n ricxapp -l app=ricxapp-scp-kpimon
+Redeploy KPI monitor
+sudo kubectl -n ricxapp rollout restart deployment ricxapp-scp-kpimon
+Uninstall KPI monitor
+dms_cli uninstall --xapp_chart_name=scp-kpimon --namespace=ricxapp
+A response of OK indicates a successful operation.
+
+
+
+Reference: https://hackmd.io/@risty/ByXQhzMys/https%3A%2F%2Fhackmd.io%2FX1CVk6E5Q9G_7HBfRAof8A
+
