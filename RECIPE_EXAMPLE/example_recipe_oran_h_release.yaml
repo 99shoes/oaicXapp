@@ -38,7 +38,7 @@ common:
 # ricip should be the ingress controller listening IP for the platform cluster
 # auxip should be the ingress controller listening IP for the AUX cluster
 extsvcplt:
-  ricip: "10.0.0.1"
+  ricip: "10.118.126.172"
   auxip: "10.0.0.1"
 
 
