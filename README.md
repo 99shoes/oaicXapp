@@ -48,7 +48,7 @@ Make sure that all the pods is ready, except for the "tiller-ricxapp" one
 
 ```
 sudo tcpdump -i cni0 -w result.pcap
-``
+```
 
 ### Make sure you see the deployment-ricplt-rtmgr for check the routing manager's log
 
