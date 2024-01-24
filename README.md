@@ -24,20 +24,30 @@ sudo srsue --gw.netns=ue1
 
 ### PING MODE
 #### Uplink 
-```sudo ip netns exec ue1 ping 172.16.0.1```
+```
+sudo ip netns exec ue1 ping 172.16.0.1
+```
 #### Downlink
-```sudo ping <ue_ip>```
+```
+sudo ping <ue_ip>
+```
 
 ## Examine
 Running the enb ue epc. In the enb, we will see the "RIC state ->ESTABLISHED"
 
-```sudo kubectl get pods -A ```
+```
+sudo kubectl get pods -A
+```
 Make sure that all the pods is ready, except for the "tiller-ricxapp" one
 ## To Check the packet
 ### Use tcpdump to generate a pcap file, and type 'ipconfig' to identify the network interface card, which is cni0."
-```sudo tcpdump -i cni0 -w result.pcap```
+```
+sudo tcpdump -i cni0 -w result.pcap
+``
 ### Make sure you see the deployment-ricplt-rtmgr for check the routing manager's log
-```sudo kubectl logs -f deployment-ricplt-rtmgr-578c64f5cf-x9658 -n ricplt```
+```
+sudo kubectl logs -f deployment-ricplt-rtmgr-578c64f5cf-x9658 -n ricplt
+```
 
 **Open Wireshark and put the pcap file to this.**
 
@@ -72,63 +82,92 @@ pip3 install ./
 docker run --restart=always -u 0 -it -d -p 8090:8080 -e DEBUG=1 -e STORAGE=local -e STORAGE_LOCAL_ROOTDIR=/charts -v $(pwd)/charts:/charts chartmuseum/chartmuseum:latest
 ```
 **Set environment variables (you need to do this again every time you open a new terminal!)**
-```export CHART_REPO_URL=http://0.0.0.0:8090```
+```
+export CHART_REPO_URL=http://0.0.0.0:8090
+```
 **Check if dms_cli is available**
 ```
 dms_cli health
 # If it returns True, it means success
 ```
 **Uninstall dms_cli**
-```pip3 uninstall xapp_onboarder```
+```
+pip3 uninstall xapp_onboarder
+```
 
 Chapters 2 to 4 are all about command introductions.
 If you want to see the actual deployment process of xApp, please jump directly to Chapter 5!
 
 # II. xApp Onboarding/Deployment/Undeployment Related Commands
 **Onboard the xApp chart**
-```dms_cli onboard --config_file_path=<CONFIG_FILE_PATH> --shcema_file_path=<SCHEMA_FILE_PATH>```
+```
+dms_cli onboard --config_file_path=<CONFIG_FILE_PATH> --shcema_file_path=<SCHEMA_FILE_PATH>
+```
 **View the onboarded charts**
-```dms_cli get_charts_list```
+```
+dms_cli get_charts_list
+```
 **Delete an onboarded chart (make sure to fill in the correct chart name and version)**
 
-```curl -X DELETE $CHART_REPO_URL/api/charts/<XAPP_CHART_NAME>/<VERSION>```
+```
+curl -X DELETE $CHART_REPO_URL/api/charts/<XAPP_CHART_NAME>/<VERSION>
+```
 **Deploy xApp**
-```dms_cli install --xapp_chart_name=XAPP_CHART_NAME --version=VERSION --namespace=NAMESPACE```
+```
+dms_cli install --xapp_chart_name=XAPP_CHART_NAME --version=VERSION --namespace=NAMESPACE
+```
 **Undeploy xApp**
 
-```dms_cli uninstall --xapp_chart_name=XAPP_CHART_NAME --namespace=NAMESPACE```
+```
+dms_cli uninstall --xapp_chart_name=XAPP_CHART_NAME --namespace=NAMESPACE
+```
 **Update xApp to a new version**
-```dms_cli upgrade --xapp_chart_name=<XAPP_CHART_NAME> --old_version=<OLD_VERSION> --new_version=<NEW_VERSION> --namespace=<NAMESPACE>```
+```
+dms_cli upgrade --xapp_chart_name=<XAPP_CHART_NAME> --old_version=<OLD_VERSION> --new_version=<NEW_VERSION> --namespace=<NAMESPACE>
+```
 **Revert xApp to an old version**
-```dms_cli rollback --xapp_chart_name=XAPP_CHART_NAME --new_version=NEW_VERSION --old_version=OLD_VERSION --namespace=NAMESPACE```
+```
+dms_cli rollback --xapp_chart_name=XAPP_CHART_NAME --new_version=NEW_VERSION --old_version=OLD_VERSION --namespace=NAMESPACE
+```
 **Check the status of xApp**
-```dms_cli health_check XAPP_CHART_NAME NAMESPACE```
+```
+dms_cli health_check XAPP_CHART_NAME NAMESPACE
+```
 
 # III. xApp Deployment
-There are multiple ways to deploy, choose one as needed!
+**There are multiple ways to deploy, choose one as needed!**
 ## 3.1 Regular Deployment
 **Fill in the necessary information according to the already onboarded chart**
-```dms_cli install --xapp_chart_name=helloxapp --version=1.0.0 --namespace=ricxapp```
+```
+dms_cli install --xapp_chart_name=helloxapp --version=1.0.0 --namespace=ricxapp
+```
 or
 ## 3.2 Custom Deployment
 **Download the values.yml file of the chart**
-```dms_cli download_values_yaml --xapp_chart_name=helloxapp --version=1.0.0```
+```
+dms_cli download_values_yaml --xapp_chart_name=helloxapp --version=1.0.0
+```
 **Then modify values.yml according to your needs, and execute this step to deploy**
-```dms_cli install --xapp_chart_name=helloxapp --version=1.0.0 --namespace=ricxapp --overridefile=values.yaml```
+```
+dms_cli install --xapp_chart_name=helloxapp --version=1.0.0 --namespace=ricxapp --overridefile=values.yaml
+```
 # IV. xApp Registration Steps
 ## 4.1 Get the IP of appmgr
-```export APPMGR_HTTP=`sudo kubectl get svc -n ricplt --field-selector metadata.name=service-ricplt-appmgr-http -o jsonpath='{.items[0].spec.clusterIP}'````
+```
+export APPMGR_HTTP=`sudo kubectl get svc -n ricplt --field-selector metadata.name=service-ricplt-appmgr-http -o jsonpath='{.items[0].spec.clusterIP}'
+````
 ## 4.2 Check if appmgr is available
-```curl -i GET http://$APPMGR_HTTP:8080/ric/v1/health/ready
-Response HTTP/1.1 200 OK indicates appmgr is available```
+```
+curl -i GET http://$APPMGR_HTTP:8080/ric/v1/health/ready
+Response HTTP/1.1 200 OK indicates appmgr is available
+```
 
 ## 4.3 Execute registration
 **After the xApp is deployed, it must first be registered to communicate with other components**
 
-Refer to your xapp's deployment config here, otherwise, errors will occur
+**Refer to your xapp's deployment config here, otherwise, errors will occur**
 
-bash
-Copy code
+```
 curl -il -X 'POST' http://$APPMGR_HTTP:8080/ric/v1/register -H 'accept: application/json' -H 'Content-Type: application/json' -d '{
 "appName": "",
 "appVersion": "", 
@@ -137,55 +176,53 @@ curl -il -X 'POST' http://$APPMGR_HTTP:8080/ric/v1/register -H 'accept: applicat
 "rmrEndpoint": "",
 "config":""
 }'
-“appName”: Name of the xapp
-“appVersion”: Version during installation
-“appInstanceName”: Must be the same as the name during xapp deployment
-“httpEndpoint”: HTTP service IP of xapp (leave empty if not available)
-“rmrEndpoint”: RMR service IP of xapp
-“config”: Content of the config during installation
-4.4 View the currently registered xApp information
+```
+**“appName”**: Name of the xapp
+**“appVersion”**: Version during installation
+**“appInstanceName”**: Must be the same as the name during xapp deployment
+**“httpEndpoint”**: HTTP service IP of xapp (leave empty if not available)
+**“rmrEndpoint”**: RMR service IP of xapp
+**“config”**: Content of the config during installation
+## 4.4 View the currently registered xApp information
 
-bash
-Copy code
+```
 curl -X GET http://$APPMGR_HTTP:8080/ric/v1/xapps | jq .
-Deregister xApp
+```
+**Deregister xApp**
 
-bash
-Copy code
+```
 curl -il -X 'POST' http://$APPMGR_HTTP:8080/ric/v1/deregister -H 'accept: application/json' -H 'Content-Type: application/json' -d '{
 "appName": "",
 "appInstanceName": ""
 }'
-“appName”: Name during registration
-“appInstanceName”: Name during registration
+```
+**“appName”**: Name during registration
+**“appInstanceName”**: Name during registration
 
-V. Example: KPI Monitor xApp Deployment and Registration
-Follow the order, onboard chart -> install xApp -> register xApp -> success!
+# V. Example: KPI Monitor xApp Deployment and Registration
+**Follow the order, onboard chart -> install xApp -> register xApp -> success!**
 
 Taking OIAC's KPI Monitor as an example
 
-5.1 Build the image
+## 5.1 Build the image
 
-bash
-Copy code
+```
 cd ~
 git clone https://github.com/openaicellular/ric-scp-kpimon.git -b upgraded-kpimon
 cd ric-scp-kpimon
-Start the build
+```
+** Start the build ** 
 
-bash
-Copy code
+```
 docker build . -t xApp-registry.local:5008/scp-kpimon:1.0.1 --no-cache
-5.2 Onboard xapp's chart
+```
+##　5.2 Onboard xapp's chart
 Since OAIC's KPI monitor lacks schema.json, we need to create it ourselves
 
-bash
-Copy code
+```
 vim schema.json
-
-
-
-fill in the content below
+```
+**fill in the content below**
 {
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "http://example.com/example.json",
@@ -194,7 +231,112 @@ fill in the content below
     "description": "The root schema comprises the entire JSON document.",
     "default": {},
     "examples": [
-       
+        {
+            "rmr": {
+                "protPort": "tcp:4560",
+                "maxSize": 2072,
+                "numWorkers": 1,
+                "rxMessages": [
+                    "RIC_SUB_RESP",
+                    "RIC_INDICATION"
+                ],
+                "txMessages": [
+                    "RIC_SUB_REQ"
+                ],
+                "policies": []
+            }
+        }
+    ],
+    "required": [
+        "rmr"
+    ],
+    "properties": {
+        "rmr": {
+            "$id": "#/properties/rmr",
+            "type": "object",
+            "title": "The rmr schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "protPort": "tcp:4560",
+                    "maxSize": 2072,
+                    "numWorkers": 1,
+                    "txMessages": [
+                        "RIC_SUB_REQ"
+                    ],
+                    "rxMessages": [
+                        "RIC_SUB_RESP",
+                        "RIC_INDICATION"
+                    ],
+                    "policies": []
+                }
+            ],
+            "required": [
+                "protPort",
+                "maxSize",
+                "numWorkers",
+                "txMessages",
+                "rxMessages",
+                "policies"
+            ],
+            "properties": {
+                "protPort": {
+                    "$id": "#/properties/rmr/properties/protPort",
+                    "type": "string",
+                    "title": "The protPort schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "tcp:4560"
+                    ]
+                },
+                "maxSize": {
+                    "$id": "#/properties/rmr/properties/maxSize",
+                    "type": "integer",
+                    "title": "The maxSize schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0,
+                    "examples": [
+                        2072
+                    ]
+                },
+                "numWorkers": {
+                    "$id": "#/properties/rmr/properties/numWorkers",
+                    "type": "integer",
+                    "title": "The numWorkers schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0,
+                    "examples": [
+                        1
+                    ]
+                },
+                "txMessages": {
+                    "$id": "#/properties/rmr/properties/txMessages",
+                    "type": "array",
+                    "title": "The txMessages schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        [
+                            "RIC_SUB_REQ",
+                            "RIC_SUB_DEL_REQ"
+                        ]
+		    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/rmr/properties/txMessages/items",
+                        "anyOf": [
+                            {
+                                "$id": "#/properties/rmr/properties/txMessages/items/anyOf/0",
+                                "type": "string",
+                                "title": "The first anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": "",
+                                "examples": [
+                                    "RIC_SUB_REQ",
+                                    "RIC_SUB_DEL_REQ"
+                                ]
                             }
                         ]
                     }
