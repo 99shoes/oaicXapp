@@ -39,7 +39,7 @@ Make sure that all the pods is ready, except for the "tiller-ricxapp" one
 ### Make sure you see the deployment-ricplt-rtmgr for check the routing manager's log
 ```sudo kubectl logs -f deployment-ricplt-rtmgr-578c64f5cf-x9658 -n ricplt```
 
-<blockquote style="background-color: #FFFF00; padding: 10px; border: 1px solid #000000;">
+<blockquote style="background-color: #ff0000; padding: 10px; border: 1px solid #000000;">
 
 **Open Wireshark and put the pcap file to this.**
 
