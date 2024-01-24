@@ -482,3 +482,98 @@ dms_cli uninstall --xapp_chart_name=scp-kpimon --namespace=ricxapp
 
 **Reference: https://hackmd.io/@risty/ByXQhzMys/https%3A%2F%2Fhackmd.io%2FX1CVk6E5Q9G_7HBfRAof8A**
 
+## Encountering Large File Problems While Uploading to GitHub
+### Download Git LFS
+2.  解压 .tar.gz 文件
+
+**Unzip the .tar.gz file**
+Open the terminal.
+Use the cd command to navigate to the directory containing the .tar.gz file.
+Unzip the file with the following command, replacing file.tar.gz with your file name:
+```
+tar -zxvf file.tar.gz
+```
+3.Run the Installation Script
+
+In the unzipped folder, there should be a script named install.sh. Follow these steps to run the script:
+Switch to the directory containing install.sh:
+```
+cd path/to/git-lfs-directory # Replace with the actual Git LFS unzipped directory
+```
+Run the installation script:
+```
+sudo ./install.sh
+```
+**Verify Installation**
+After installation, you can verify if Git LFS is installed successfully by running:
+```
+git lfs version
+```
+###  Upload to Github
+**1.Track Large Files**
+- Use Git LFS to track those large files you want to manage with LFS. For example, if you want to track all .psd files, you can use the following command:
+```
+git lfs track "*.psd"
+```
+or
+```
+git lfs track "./srsRAN-e2/build/srsenb/src/srsenb"
+```
+- This will update the .gitattributes file, telling Git to use LFS for these types of files.
+**2.Add Changes to the Staging Area**
+
+- Add the .gitattributes file to the staging area:
+```
+git add .gitattributes
+```
+- Then add the large file you want to upload:
+- 
+```
+git add your-large-file.psd
+e.g.
+git add srsRAN-e2/build/srsenb/test/rrc/erab_setup_test
+```
+**3.Commit Changes**
+```
+git commit -m "Add large file with LFS"
+```
+**4.Push to Remote Repository**
+```
+git push origin <branch-name>
+```
+
+**4.2 Force Push to Remote Repository**
+
+Since you have made changes to the history, you may need to use force push:
+```
+git push origin <branch-name> --force
+```
+Note that force pushing will rewrite the history of the remote branch, which may affect other collaborators. Ensure this is acceptable for you and your team before using force push.
+
+**5.Check LFS Files**
+```
+git lfs ls-files
+```
+This will list all the files currently tracked by Git LFS. Ensure all the large files that should be managed by Git LFS are on this list.
+
+### If it still not work
+
+**Files Not Managed by Git LFS**: Even if you have set tracking rules with git lfs track, if these files were already committed to Git before you ran git lfs track, they won't automatically be moved to Git LFS.
+
+**Migrate Existing Files to Git LFS**
+
+If there are large files not managed by Git LFS, you can use the git lfs migrate command to migrate them to Git LFS. For example:
+```
+git lfs migrate import --include="*.a,*.test,...other file types" --everything
+git lfs migrate import --include="srsRAN-e2/build/srsenb/test/rrc/erab_setup_test" --everything
+```
+**Commit and Push Changes**
+
+After completing the migration, recommit and push your changes:
+```
+git add .
+git commit -m "Migrate large files to Git LFS"
+git push origin h-release --force
+```
+**Notes**
+The git lfs migrate command will rewrite your commit history, which may affect other collaborators. Ensure you communicate with your team members before performing this action.
