@@ -446,8 +446,11 @@ curl -il -X 'POST' http://$APPMGR_HTTP:8080/ric/v1/register -H 'accept: applicat
 ```
 
 **A response of HTTP/1.1 201 Created indicates a successful operation.**
-##　5.5 Check if Registration Was Successful
+
+## 5.5 Check if Registration Was Successful
+
 **You should be able to see the registration information for the KPI xApp.**
+
 ## 5.6 Other Common Commands
 **Deregister**
 
