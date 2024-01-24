@@ -5,43 +5,49 @@ https://openaicellular.github.io/oaic/setup5gnetwork.html
 ```sudo srsepc```
 ### en-gNB and UE in ZeroMQ Mode
 ### Running the en-gNB & connecting to near-RT RIC
+```
 export E2NODE_IP=`hostname  -I | cut -f1 -d' '`
 export E2NODE_PORT=5006
 export E2TERM_IP=`sudo kubectl get svc -n ricplt --field-selector metadata.name=service-ricplt-e2term-sctp-alpha -o jsonpath='{.items[0].spec.clusterIP}'`
+```
 ### srsENB in ZeroMQ mode
+```
 sudo srsenb --enb.n_prb=50 --enb.name=enb1 --enb.enb_id=0x19B \
 --rf.device_name=zmq --rf.device_args="fail_on_disconnect=true,tx_port0=tcp://*:2000,rx_port0=tcp://localhost:2001,tx_port1=tcp://*:2100,rx_port1=tcp://localhost:2101,id=enb,base_srate=23.04e6" \
 --ric.agent.remote_ipv4_addr=${E2TERM_IP} --log.all_level=warn --ric.agent.log_level=debug --log.filename=stdout --ric.agent.local_ipv4_addr=${E2NODE_IP} --ric.agent.local_port=${E2NODE_PORT}
-### srsUE in ZeroMQ mode
-sudo srsue --gw.netns=ue1
+```
 
+### srsUE in ZeroMQ mode
+```
+sudo srsue --gw.netns=ue1
+```
 
 ### PING MODE
 #### Uplink 
-sudo ip netns exec ue1 ping 172.16.0.1
-#### Uplink ue machine
-sudo ping 172.16.0.2
+```sudo ip netns exec ue1 ping 172.16.0.1```
+#### Downlink
+```sudo ping <ue_ip>```
 
 ## Examine
-Running the enb ue epc and in the enb, we will see the "RIC state ->ESTABLISHED"
+Running the enb ue epc. In the enb, we will see the "RIC state ->ESTABLISHED"
 
 ### sudo kubectl get pods -A
 Make sure that all the pods is ready, except for the "tiller-ricxapp" one
 ## To Check the packet
-### Use tcpdump to produce pcap file, cni0 is the network interface card
-sudo tcpdump -i cni0 -w result.pcap
+### Use tcpdump to generate a pcap file, and type 'ipconfig' to identify the network interface card, which is cni0."
+```sudo tcpdump -i cni0 -w result.pcap```
 ### Make sure you see the deployment-ricplt-rtmgr for check the routing manager's log
 sudo kubectl logs -f deployment-ricplt-rtmgr-578c64f5cf-x9658 -n ricplt
 
 ### Open wireshark and put the pcap file to this.
-### Type e2ap in the filter, and you might find out one with E2AP protocol
-### Decode it, and Make the Field part to SCTP port, Value part to 36422.
+### Type e2ap in the filter, and you will find a packet with the E2AP protocol.
+### Decode it, and set the Field part to SCTP port, Value part to 36422.
 ![image](https://github.com/99shoes/oaicXapp/assets/82441856/a899e1e8-f834-44cc-8429-5b7dbd12519b)
 ![image](https://github.com/99shoes/oaicXapp/assets/82441856/8cec7ba8-1100-4fe0-be57-9347ce7e3dd5)
 It will have successfulOutcome
 ![image](https://github.com/99shoes/oaicXapp/assets/82441856/452386d0-5386-4322-b61c-c7cf4d5f2edb)
 
-And now we complete the Near-RT RIC with en-gNB
+:wave: Finally, we complete the Near-RT RIC with en-gNB
 
 ## xApp Deployment
 Near-RT RIC Version: E-Release up
