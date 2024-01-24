@@ -218,18 +218,23 @@ cd ~
 git clone https://github.com/openaicellular/ric-scp-kpimon.git -b upgraded-kpimon
 cd ric-scp-kpimon
 ```
-** Start the build ** 
+
+**Start the build** 
 
 ```
 docker build . -t xApp-registry.local:5008/scp-kpimon:1.0.1 --no-cache
 ```
-##　5.2 Onboard xapp's chart
+
+## 5.2 Onboard xapp's chart
 Since OAIC's KPI monitor lacks schema.json, we need to create it ourselves
 
 ```
 vim schema.json
 ```
+
 **fill in the content below**
+
+```
 {
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "http://example.com/example.json",
@@ -408,13 +413,25 @@ vim schema.json
     },
     "additionalProperties": true
 }
-execute onboard
+```
+**execute onboard**
+
+```
 export CHART_REPO_URL=http://0.0.0.0:8090
 dms_cli onboard scp-kpimon-config-file.json schema.json
-5.3 Execute Deployment
+```
+
+## 5.3 Execute Deployment
+
+```
 dms_cli install --xapp_chart_name=scp-kpimon --version=1.0.1 --namespace=ricxapp
-5.4 Register KPI xApp
-Before proceeding with registration, ensure that your eNB or gNB is already connected to the Near-RT RIC!
+```
+
+## 5.4 Register KPI xApp
+
+**Before proceeding with registration, ensure that your eNB or gNB is already connected to the Near-RT RIC!**
+
+```
 # 只需要輸入一次
 export APPMGR_HTTP=`sudo kubectl get svc -n ricplt --field-selector metadata.name=service-ricplt-appmgr-http -o jsonpath='{.items[0].spec.clusterIP}'`
 
@@ -425,28 +442,40 @@ curl -il -X 'POST' http://$APPMGR_HTTP:8080/ric/v1/register -H 'accept: applicat
 "appInstanceName": "scp-kpimon",
 "httpEndpoint": "<none>:8080",
 "rmrEndpoint": "<none>:4560",
+"config": "{\"json_url\": \"scp-kpimon\",\n \"xapp_name\": \"scp-kpimon\",\n \"version\": \"1.0.1\",\n \"containers\": [{\"name\": \"scp-kpimon-xapp\",\n \"image\": {\"registry\": \"xApp-registry.local:5008\",\n \"name\": \"scp-kpimon\",\n \"tag\":\"1.0.1\"\n}}],\n \"appenv\": { \"ranList\":\"enB_macro_001_001_0019b0\"},\n \"messaging\": {\n \"ports\": [\n {\"name\":\"http\",\"container\":\"scp-kpimon-xapp\",\"port\":8080,\"description\":\"http service\"},{\n \"name\": \"rmr-data\",\n \"container\": \"scp-kpimon-xapp\",\n \"port\": 4560,\n \"rxMessages\": [ \"RIC_SUB_RESP\", \"RIC_SUB_FAILURE\", \"RIC_INDICATION\", \"RIC_SUB_DEL_RESP\", \"RIC_SUB_DEL_FAILURE\" ],\n \"txMessages\": [ \"RIC_SUB_REQ\", \"RIC_SUB_DEL_REQ\" ],\n \"policies\": [1],\n \"description\": \"rmr receive data port for scp-kpimon-xapp\"},\n {\"name\":\"rmr-route\",\n \"container\": \"scp-kpimon-xapp\",\n \"port\": 4561,\n \"description\": \"rmr route port for scp-kpimon-xapp\"}]},\n \"rmr\": { \"protPort\": \"tcp:4560\",\n \"maxSize\": 2072,\n \"numWorkers\": 1,\n \"txMessages\": [ \"RIC_SUB_REQ\", \"RIC_SUB_DEL_REQ\" ],\n \"rxMessages\": [ \"RIC_SUB_RESP\", \"RIC_SUB_FAILURE\", \"RIC_INDICATION\", \"RIC_SUB_DEL_RESP\", \"RIC_SUB_DEL_FAILURE\" ],\n \"policies\": [1] }}"}'
+```
 
+**A response of HTTP/1.1 201 Created indicates a successful operation.**
+##　5.5 Check if Registration Was Successful
+**You should be able to see the registration information for the KPI xApp.**
+## 5.6 Other Common Commands
+**Deregister**
 
-A response of HTTP/1.1 201 Created indicates a successful operation.
-5.5 Check if Registration Was Successful
-You should be able to see the registration information for the KPI xApp.
-5.6 Other Common Commands
-Deregister
+```
 curl -il -X 'POST' http://$APPMGR_HTTP:8080/ric/v1/deregister -H 'accept: application/json' -H 'Content-Type: application/json' -d '{
 "appName": "scp-kpimon",
 "appInstanceName": "scp-kpimon"
 }'
+```
 
-A response of HTTP/1.1 204 No Content indicates a successful operation.
-Check the logs of the KPI monitor
+**A response of HTTP/1.1 204 No Content indicates a successful operation.**
+**Check the logs of the KPI monitor**
+
+```
 sudo kubectl logs -f -n ricxapp -l app=ricxapp-scp-kpimon
-Redeploy KPI monitor
+```
+
+**Redeploy KPI monitor**
+```
 sudo kubectl -n ricxapp rollout restart deployment ricxapp-scp-kpimon
-Uninstall KPI monitor
+```
+**Uninstall KPI monitor**
+```
 dms_cli uninstall --xapp_chart_name=scp-kpimon --namespace=ricxapp
-A response of OK indicates a successful operation.
+```
+
+**A response of OK indicates a successful operation.**
 
 
-
-Reference: https://hackmd.io/@risty/ByXQhzMys/https%3A%2F%2Fhackmd.io%2FX1CVk6E5Q9G_7HBfRAof8A
+**Reference: https://hackmd.io/@risty/ByXQhzMys/https%3A%2F%2Fhackmd.io%2FX1CVk6E5Q9G_7HBfRAof8A**
 
