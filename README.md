@@ -40,9 +40,9 @@ Make sure that all the pods is ready, except for the "tiller-ricxapp" one
 ```sudo kubectl logs -f deployment-ricplt-rtmgr-578c64f5cf-x9658 -n ricplt```
 
 <div style="background-color: #FFFF00; padding: 10px; border: 1px solid #000000;">
-**Open wireshark and put the pcap file to this.**
-**Type e2ap in the filter, and you will find a packet with the E2AP protocol.**
-** Decode it, and set the Field part to SCTP port, Value part to 36422.**
+** Open wireshark and put the pcap file to this. **
+** Type e2ap in the filter, and you will find a packet with the E2AP protocol. **
+** Decode it, and set the Field part to SCTP port, Value part to 36422. **
 </div>
 
 ![image](https://github.com/99shoes/oaicXapp/assets/82441856/a899e1e8-f834-44cc-8429-5b7dbd12519b)
