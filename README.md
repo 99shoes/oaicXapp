@@ -10,6 +10,7 @@ export E2NODE_IP=`hostname  -I | cut -f1 -d' '`
 export E2NODE_PORT=5006
 export E2TERM_IP=`sudo kubectl get svc -n ricplt --field-selector metadata.name=service-ricplt-e2term-sctp-alpha -o jsonpath='{.items[0].spec.clusterIP}'`
 ```
+
 ### srsENB in ZeroMQ mode
 ```
 sudo srsenb --enb.n_prb=50 --enb.name=enb1 --enb.enb_id=0x19B \
@@ -27,7 +28,9 @@ sudo srsue --gw.netns=ue1
 ```
 sudo ip netns exec ue1 ping 172.16.0.1
 ```
+
 #### Downlink
+
 ```
 sudo ping <ue_ip>
 ```
@@ -38,13 +41,17 @@ Running the enb ue epc. In the enb, we will see the "RIC state ->ESTABLISHED"
 ```
 sudo kubectl get pods -A
 ```
+
 Make sure that all the pods is ready, except for the "tiller-ricxapp" one
 ## To Check the packet
 ### Use tcpdump to generate a pcap file, and type 'ipconfig' to identify the network interface card, which is cni0."
+
 ```
 sudo tcpdump -i cni0 -w result.pcap
 ``
+
 ### Make sure you see the deployment-ricplt-rtmgr for check the routing manager's log
+
 ```
 sudo kubectl logs -f deployment-ricplt-rtmgr-578c64f5cf-x9658 -n ricplt
 ```
