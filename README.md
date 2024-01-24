@@ -47,7 +47,7 @@ Make sure that all the pods is ready, except for the "tiller-ricxapp" one
 
 ![image](https://github.com/99shoes/oaicXapp/assets/82441856/a899e1e8-f834-44cc-8429-5b7dbd12519b)
 ![image](https://github.com/99shoes/oaicXapp/assets/82441856/8cec7ba8-1100-4fe0-be57-9347ce7e3dd5)
-It will have successfulOutcome
+**It will have successfulOutcome**
 ![image](https://github.com/99shoes/oaicXapp/assets/82441856/452386d0-5386-4322-b61c-c7cf4d5f2edb)
 
 :wave: Finally, we complete the Near-RT RIC with en-gNB
@@ -59,101 +59,71 @@ Applicable appmgr Version: 0.5.4 up
 -- dms_cli offers rich set of command line utility to onboard hw-python xapp to chartmuseme. --
 
 Note! Remember to check if the version of your environment is correct to avoid failure in operations!
-I. Preparations
+# I. Preparations
 ### 1.1 Install DMS_CLI
+```
 sudo -i
 git clone https://gerrit.o-ran-sc.org/r/ric-plt/appmgr
 cd ~/appmgr/xapp_orchestrater/dev/xapp_onboarder
 pip3 install ./
-Create a helm repository with port 8080, which can then be used to deploy xapp
+```
+**Create a helm repository with port 8080, which can then be used to deploy xapp**
+```
 docker run --restart=always -u 0 -it -d -p 8090:8080 -e DEBUG=1 -e STORAGE=local -e STORAGE_LOCAL_ROOTDIR=/charts -v $(pwd)/charts:/charts chartmuseum/chartmuseum:latest
-Set environment variables (you need to do this again every time you open a new terminal!)
-export CHART_REPO_URL=http://0.0.0.0:8090
-Check if dms_cli is available
+```
+**Set environment variables (you need to do this again every time you open a new terminal!)**
+```export CHART_REPO_URL=http://0.0.0.0:8090```
+**Check if dms_cli is available**
+```
 dms_cli health
 # If it returns True, it means success
-Uninstall dms_cli
-pip3 uninstall xapp_onboarder
+```
+**Uninstall dms_cli**
+```pip3 uninstall xapp_onboarder```
 
 Chapters 2 to 4 are all about command introductions.
 If you want to see the actual deployment process of xApp, please jump directly to Chapter 5!
 
-II. xApp Onboarding/Deployment/Undeployment Related Commands
-Onboard the xApp chart
+# II. xApp Onboarding/Deployment/Undeployment Related Commands
+**Onboard the xApp chart**
+```dms_cli onboard --config_file_path=<CONFIG_FILE_PATH> --shcema_file_path=<SCHEMA_FILE_PATH>```
+**View the onboarded charts**
+```dms_cli get_charts_list```
+**Delete an onboarded chart (make sure to fill in the correct chart name and version)**
 
-bash
-Copy code
-dms_cli onboard --config_file_path=<CONFIG_FILE_PATH> --shcema_file_path=<SCHEMA_FILE_PATH>
-View the onboarded charts
+```curl -X DELETE $CHART_REPO_URL/api/charts/<XAPP_CHART_NAME>/<VERSION>```
+**Deploy xApp**
+```dms_cli install --xapp_chart_name=XAPP_CHART_NAME --version=VERSION --namespace=NAMESPACE```
+**Undeploy xApp**
 
-bash
-Copy code
-dms_cli get_charts_list
-Delete an onboarded chart (make sure to fill in the correct chart name and version)
+```dms_cli uninstall --xapp_chart_name=XAPP_CHART_NAME --namespace=NAMESPACE```
+**Update xApp to a new version**
+```dms_cli upgrade --xapp_chart_name=<XAPP_CHART_NAME> --old_version=<OLD_VERSION> --new_version=<NEW_VERSION> --namespace=<NAMESPACE>```
+**Revert xApp to an old version**
+```dms_cli rollback --xapp_chart_name=XAPP_CHART_NAME --new_version=NEW_VERSION --old_version=OLD_VERSION --namespace=NAMESPACE```
+**Check the status of xApp**
+```dms_cli health_check XAPP_CHART_NAME NAMESPACE```
 
-bash
-Copy code
-curl -X DELETE $CHART_REPO_URL/api/charts/<XAPP_CHART_NAME>/<VERSION>
-Deploy xApp
-
-bash
-Copy code
-dms_cli install --xapp_chart_name=XAPP_CHART_NAME --version=VERSION --namespace=NAMESPACE
-Undeploy xApp
-
-bash
-Copy code
-dms_cli uninstall --xapp_chart_name=XAPP_CHART_NAME --namespace=NAMESPACE
-Update xApp to a new version
-
-bash
-Copy code
-dms_cli upgrade --xapp_chart_name=<XAPP_CHART_NAME> --old_version=<OLD_VERSION> --new_version=<NEW_VERSION> --namespace=<NAMESPACE>
-Revert xApp to an old version
-
-bash
-Copy code
-dms_cli rollback --xapp_chart_name=XAPP_CHART_NAME --new_version=NEW_VERSION --old_version=OLD_VERSION --namespace=NAMESPACE
-Check the status of xApp
-
-bash
-Copy code
-dms_cli health_check XAPP_CHART_NAME NAMESPACE
-III. xApp Deployment
+# III. xApp Deployment
 There are multiple ways to deploy, choose one as needed!
-3.1 Regular Deployment
-Fill in the necessary information according to the already onboarded chart
-
-bash
-Copy code
-dms_cli install --xapp_chart_name=helloxapp --version=1.0.0 --namespace=ricxapp
+## 3.1 Regular Deployment
+**Fill in the necessary information according to the already onboarded chart**
+```dms_cli install --xapp_chart_name=helloxapp --version=1.0.0 --namespace=ricxapp```
 or
-3.2 Custom Deployment
-Download the values.yml file of the chart
+## 3.2 Custom Deployment
+**Download the values.yml file of the chart**
+```dms_cli download_values_yaml --xapp_chart_name=helloxapp --version=1.0.0```
+**Then modify values.yml according to your needs, and execute this step to deploy**
+```dms_cli install --xapp_chart_name=helloxapp --version=1.0.0 --namespace=ricxapp --overridefile=values.yaml```
+# IV. xApp Registration Steps
+## 4.1 Get the IP of appmgr
+```export APPMGR_HTTP=`sudo kubectl get svc -n ricplt --field-selector metadata.name=service-ricplt-appmgr-http -o jsonpath='{.items[0].spec.clusterIP}'````
+## 4.2 Check if appmgr is available
+```curl -i GET http://$APPMGR_HTTP:8080/ric/v1/health/ready
+Response HTTP/1.1 200 OK indicates appmgr is available```
 
-bash
-Copy code
-dms_cli download_values_yaml --xapp_chart_name=helloxapp --version=1.0.0
-Then modify values.yml according to your needs, and execute this step to deploy
-
-bash
-Copy code
-dms_cli install --xapp_chart_name=helloxapp --version=1.0.0 --namespace=ricxapp --overridefile=values.yaml
-IV. xApp Registration Steps
-4.1 Get the IP of appmgr
-
-bash
-Copy code
-export APPMGR_HTTP=`sudo kubectl get svc -n ricplt --field-selector metadata.name=service-ricplt-appmgr-http -o jsonpath='{.items[0].spec.clusterIP}'`
-4.2 Check if appmgr is available
-
-bash
-Copy code
-curl -i GET http://$APPMGR_HTTP:8080/ric/v1/health/ready
-Response HTTP/1.1 200 OK indicates appmgr is available
-
-4.3 Execute registration
-After the xApp is deployed, it must first be registered to communicate with other components
+## 4.3 Execute registration
+**After the xApp is deployed, it must first be registered to communicate with other components**
 
 Refer to your xapp's deployment config here, otherwise, errors will occur
 
