@@ -2,7 +2,7 @@
 https://openaicellular.github.io/oaic/setup5gnetwork.html
 ## Setup 5G Network
 ### Running the EPC
-sudo srsepc
+```sudo srsepc```
 ### en-gNB and UE in ZeroMQ Mode
 ### Running the en-gNB & connecting to near-RT RIC
 export E2NODE_IP=`hostname  -I | cut -f1 -d' '`
