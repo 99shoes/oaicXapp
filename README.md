@@ -484,16 +484,14 @@ dms_cli uninstall --xapp_chart_name=scp-kpimon --namespace=ricxapp
 
 ## Encountering Large File Problems While Uploading to GitHub
 ### Download Git LFS
-2.  解压 .tar.gz 文件
-
-**Unzip the .tar.gz file**
+**1.Unzip the .tar.gz file**
 Open the terminal.
 Use the cd command to navigate to the directory containing the .tar.gz file.
 Unzip the file with the following command, replacing file.tar.gz with your file name:
 ```
 tar -zxvf file.tar.gz
 ```
-3.Run the Installation Script
+**2.Run the Installation Script**
 
 In the unzipped folder, there should be a script named install.sh. Follow these steps to run the script:
 Switch to the directory containing install.sh:
@@ -504,7 +502,7 @@ Run the installation script:
 ```
 sudo ./install.sh
 ```
-**Verify Installation**
+**3.Verify Installation**
 After installation, you can verify if Git LFS is installed successfully by running:
 ```
 git lfs version
